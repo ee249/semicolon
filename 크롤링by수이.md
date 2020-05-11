@@ -2,6 +2,7 @@
 
 ### 이마트 크롤링(동적크롤링) - 서울만
 
+```R
 library(RSelenium)
 remDr <- remoteDriver(remoteServerAddr = "localhost" , port = 4445, browserName = "chrome")
 remDr$open()
@@ -43,11 +44,17 @@ for (i in 1:30) {
 df <- data.frame(cbind(sname, saddr))
 write.csv(df, "emart.csv")
 getwd()
+```
+
+
+
+
 
 ## 신세계 백화점 크롤링(정적크롤링) - 전지점
 
 ### SC00001 ~ SC00013 (SC00004 제외)
 
+```R
 library(httr)
 library(rvest)
 library(XML)
@@ -81,11 +88,13 @@ for(i in 5:13){
 
 df2<- data.frame(cbind(dname, daddr))
 write.csv(df2, "ssgd.csv")
+```
 
 
 
 ## GS편의점(동적크롤링) - 서울만
 
+```R
 remDr <- remoteDriver(remoteServerAddr = "localhost" , port = 4445, browserName = "chrome")
 remDr$open()
 url <- 'http://gs25.gsretail.com/gscvs/ko/store-services/locations'
@@ -110,6 +119,7 @@ for(i in 1:599){ #page
     gsaddr<-remDr$findElements(using ="css selector",gs2)
     gsaddr <-sapply(gsaddr,function(x){x$getElementText()})
     gsaddrlist <- rbind(gsaddrlist, gsaddr)
+
   }
   nextbtn <- remDr$findElement(using='css','#pagingTagBox > a.next')
   nextbtn$clickElement()
@@ -118,11 +128,17 @@ for(i in 1:599){ #page
 
 df3 <- data.frame(unlist(gsnamelist), unlist(gsaddrlist))
 write.csv(df3, "gs.csv")
+```
+
+
+
+
 
 
 
 ## 세븐일레븐(동적크롤링) - 서울만
 
+```R
 url <- "http://www.7-eleven.co.kr/"
 remDr$navigate(url)
 
@@ -168,3 +184,5 @@ for(i in 2:26){
 }
 df4 <- data.frame(seven11name, seven11addr)
 write.csv(df4, "seven11_2.csv")
+```
+
