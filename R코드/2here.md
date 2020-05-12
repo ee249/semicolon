@@ -132,3 +132,51 @@ data2 <- sapply(value2, function(x){x[2]})
 write.csv(data.frame(data1,data2),file="data/ministop2.csv")
 ```
 
+
+
+- 롯데시네마
+
+```R
+# 롯데시네마 페이지 들어가기
+
+library(RSelenium)
+
+remDr <- remoteDriver(remoteServerAddr = "localhost" , port = 4445, browserName = "chrome")
+remDr$open()
+url<-"https://search.naver.com/search.naver?sm=top_hty&fbm=1&ie=utf8&query=%EB%A1%AF%EB%8D%B0%EC%8B%9C%EB%84%A4%EB%A7%88"
+remDr$navigate(url)
+Sys.sleep(3)
+pageLink <- NULL
+title <- NULL
+jijum <- NULL
+
+doms0 <- remDr$findElements(using = "css selector", "#main_pack > div.content_search.section._movie_theater > div > div.contents03_sub._theater_search_container > div > div._wrap_list_type > div > div._wrap_theater_list > div.mvhu_list._wrap_not_empty > table > tbody > tr > th > span > a")
+doms1 <- remDr$findElements(using = "css selector", "#main_pack > div.content_search.section._movie_theater > div > div.contents03_sub._theater_search_container > div > div._wrap_list_type > div > div._wrap_theater_list > div.mvhu_list._wrap_not_empty > table > tbody > tr > td  > span")
+Sys.sleep(1)
+reple_v0 <- sapply(doms0, function (x) {x$getElementText()})
+reple_v1 <- sapply(doms1, function (x) {x$getElementText()})
+title <- append(title, unlist(reple_v0))
+jijum <- append(jijum, unlist(reple_v1))
+
+for(i in 1:4){
+  print("1")
+  b_tn <- remDr$findElement(using='css', "#main_pack > div.content_search.section._movie_theater > div > div.contents03_sub._theater_search_container > div > div._wrap_list_type > div > div._wrap_theater_list > div.mvhu_list._wrap_not_empty > div > div > a.nxt._btn_next.on")
+  b_tn$clickElement()
+  print("2")
+  Sys.sleep(2)
+  
+  doms0 <- remDr$findElements(using = "css selector", "#main_pack > div.content_search.section._movie_theater > div > div.contents03_sub._theater_search_container > div > div._wrap_list_type > div > div._wrap_theater_list > div.mvhu_list._wrap_not_empty > table > tbody > tr > th > span > a")
+  doms1 <- remDr$findElements(using = "css selector", "#main_pack > div.content_search.section._movie_theater > div > div.contents03_sub._theater_search_container > div > div._wrap_list_type > div > div._wrap_theater_list > div.mvhu_list._wrap_not_empty > table > tbody > tr > td  > span")  
+   Sys.sleep(1)
+  reple_v0 <- sapply(doms0, function (x) {x$getElementText()})
+  reple_v1 <- sapply(doms1, function (x) {x$getElementText()})
+  title <- append(title, unlist(reple_v0))
+  jijum <- append(jijum, unlist(reple_v1))
+}
+
+data <- data.frame(title,jijum)
+names(data) <- c("지점","도로명")
+View(data)
+write.csv(data,file="data/lotteC.csv")
+```
+
