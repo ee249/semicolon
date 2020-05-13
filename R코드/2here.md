@@ -180,3 +180,92 @@ View(data)
 write.csv(data,file="data/lotteC.csv")
 ```
 
+
+
+- 할리스커피
+
+\- 다음페이지가 고정이고 1, 2, 3, ... 9, 10을 누른뒤 >를 누르면 11로 이동하고 또 다시 12,13, ... ,16이렇게 진행
+
+```R
+# 할리스 페이지 들어가기
+library(RSelenium)
+remDr<-remoteDriver(remoteServerAddr= "localhost",port = 4445, browserName= "chrome")
+remDr$open()
+remDr$navigate("http://www.hollys.co.kr/store/korea/korStore.do?pageNo=1&sido=%EC%84%9C%EC%9A%B8&gugun=&store=")
+
+
+title <- NULL 
+jijum <- NULL
+Andflag <- TRUE // for문에서 나오기 위해서 만듬
+
+#지역 클릭
+search <- list()
+search<- remDr$findElement(using='id',"mySelect1")
+search$clickElement()
+Sys.sleep(1)
+
+#서울지역으로 클릭
+seoul<- remDr$findElement(using='css',"#mySelect1 > option:nth-child(2)")
+seoul$clickElement()
+Sys.sleep(1)
+
+
+doms0 <- remDr$findElements(using = "css selector","#contents > div.content > fieldset > div.tableType01 > table > tbody > tr > td:nth-child(2) > a")
+doms1 <- remDr$findElements(using = "css selector", "#contents > div.content > fieldset > div.tableType01 > table > tbody > tr > td:nth-child(4) > a")
+
+reple_v0 <- sapply(doms0, function (x) {x$getElementText()})
+reple_v1 <- sapply(doms1, function (x) {x$getElementText()})
+
+title <- append(title, unlist(reple_v0))
+jijum <- append(jijum, unlist(reple_v1)) 
+
+for(j in 1:2){
+ for(i in 3:11){
+    
+    nextCss <- paste0("#contents > div.content > fieldset > div.paging > a:nth-child(",i,")")
+    nextbtn <- NULL
+    try(nextbtn <- remDr$findElement(using='css', nextCss) , silent=TRUE)
+    if(is.null(nextbtn)){
+      print(nextbtn)
+      Andflag <- FALSE
+      break;
+    } 
+    
+    nextbtn$clickElement()
+    
+    doms0 <- remDr$findElements(using = "css selector", "#contents > div.content > fieldset > div.tableType01 > table > tbody > tr > td:nth-child(2)")
+    doms1 <- remDr$findElements(using = "css selector", "#contents > div.content > fieldset > div.tableType01 > table > tbody > tr > td:nth-child(4) > a")
+    
+    reple_v0 <- sapply(doms0, function (x) {x$getElementText()})
+    reple_v1 <- sapply(doms1, function (x) {x$getElementText()})
+    
+    title <- append(title, unlist(reple_v0))
+    jijum <- append(jijum, unlist(reple_v1)) 
+    
+ }
+  
+  if(Andflag == FALSE) break; 
+  
+  nextPage<-remDr$findElement(using='css',
+                              "#contents > div.content > fieldset > div.paging > a:nth-child(12) > img")
+  nextPage$clickElement()
+  Sys.sleep(1)
+  
+  doms0 <- remDr$findElements(using = "css selector","#contents > div.content > fieldset > div.tableType01 > table > tbody > tr > td:nth-child(2) > a")
+  doms1 <- remDr$findElements(using = "css selector", "#contents > div.content > fieldset > div.tableType01 > table > tbody > tr > td:nth-child(4) > a")
+  
+  reple_v0 <- sapply(doms0, function (x) {x$getElementText()})
+  reple_v1 <- sapply(doms1, function (x) {x$getElementText()})
+  
+  title <- append(title, unlist(reple_v0))
+  jijum <- append(jijum, unlist(reple_v1)) 
+}
+
+
+data <- data.frame(title, jijum)
+names(data) <- c("지점","도로명")
+View(data)
+write.csv(data,file="data/hs.csv")
+
+```
+
