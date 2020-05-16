@@ -1,0 +1,41 @@
+CREATE TABLE CAFEINFO_TB
+(
+    id       INT              NOT NULL, 
+    brand    VARCHAR2(300)    NOT NULL, 
+    CONSTRAINT CAFEINFO_TB_PK PRIMARY KEY (id)
+)
+
+CREATE TABLE CAFE_TB
+(
+    no      INT              NOT NULL, 
+    id      INT              NOT NULL, 
+    name    VARCHAR2(300)    NULL, 
+    addr    VARCHAR2(900)    NULL, 
+    lat     NUMBER           NULL, 
+    lng     NUMBER           NULL, 
+    CONSTRAINT CAFE_TB_PK PRIMARY KEY (no)
+)
+
+CREATE SEQUENCE CAFE_TB_SEQ
+START WITH 1
+INCREMENT BY 1;
+
+
+CREATE OR REPLACE TRIGGER CAFE_TB_AI_TRG
+BEFORE INSERT ON CAFE_TB 
+REFERENCING NEW AS NEW FOR EACH ROW 
+BEGIN 
+    SELECT CAFE_TB_SEQ.NEXTVAL
+    INTO :NEW.no
+    FROM DUAL;
+END;
+
+--DROP TRIGGER CAFE_TB_AI_TRG;
+--DROP SEQUENCE CAFE_TB_SEQ;
+
+
+ALTER TABLE CAFE_TB
+    ADD CONSTRAINT FK_CAFE_TB_id_CAFEINFO_TB_id FOREIGN KEY (id)
+        REFERENCES CAFEINFO_TB (id)
+;
+--------------------------------------------------------------
