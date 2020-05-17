@@ -186,3 +186,115 @@ df4 <- data.frame(seven11name, seven11addr)
 write.csv(df4, "seven11_2.csv")
 ```
 
+
+
+# 이디야(강서구, 중구 제외)
+
+강서구, 중구 => 세미님
+
+```R
+
+
+#gugu <- c("강남구","강동구","강북구", "강서구","관악구","광진구","구로구","금천구","노원구","도봉구","동대문구",
+#          "동작구","마포구","서대문구","서초구","성동구","성북구","송파구","양천구","영등포구", "용산구","은평구", 
+#          "종로구","중구",  "중랑구")
+gugu <- c("강남구","강동구","강북구","관악구","광진구","구로구","금천구","노원구","도봉구","동대문구",
+          "동작구","마포구","서대문구","서초구","성동구","성북구","송파구","양천구","영등포구", "용산구","은평구", 
+          "종로구","중랑구")
+
+length(gugu)
+
+eurl <- 'https://www.ediya.com/contents/find_store.html'
+remDr$navigate(eurl)
+
+
+
+ediyalist <- NULL
+for(i in 1:24){
+  #storename
+  jusotab <- '#contentWrap > div.contents > div > div.store_search_pop > ul > li:nth-child(2) > a'
+  jusotab <- remDr$findElement(using='css',jusotab)
+  jusotab$clickElement()
+  
+  guname <- gugu[i]
+  webElem <- remDr$findElement(using = 'css', "input[id='keyword']")
+  webElem$sendKeysToElement(list(guname))
+  searchbtn <- '#keyword_div > form > button'
+  searchbtn <- remDr$findElement(using='css',searchbtn)
+  searchbtn$clickElement()
+  Sys.sleep(2)
+  plist <- '#placesList'
+  plist <- remDr$findElements(using='css',plist)
+  plist <- sapply(plist,function(x){x$getElementText()})
+  strsplit(unlist(plist), '\n') -> elist
+  unlist(elist) -> elist
+  length(elist) -> elen
+  elist[1:elen*2] -> col2
+  elist[1:elen*2-1] -> col1
+  
+  ediyalist <- rbind(ediyalist,data.frame(name = col1[!is.na(col1)], addr = col2[!is.na(col2)]))
+}
+
+write.csv(ediyalist, "ediya1.csv")
+View(ediyalist)
+```
+
+
+
+# 롯데마트(서울만)
+
+```R
+# 서브 페이지에 데이터가 있을 경우에 메인페이지에서 태그를 못찾음.
+remDr <- remoteDriver(remoteServerAddr = "localhost" , port = 4445, browserName = "chrome")
+remDr$open()
+#main URL
+url1 <- 'https://company.lottemart.com/bc/branch/main.do'
+remDr$navigate(url1)
+#iframe URL(참고용)
+url2 <- 'https://company.lottemart.com/bc/branchSearch/branchSearch.do?schBrnchTypeCd=BC0701'
+#전국 - 서울 클릭
+remDr$findElement(using='css','#txtRegnNm')$clickElement()
+Sys.sleep(2)
+remDr$findElement(using='css','#inpBC0101')$clickElement()
+Sys.sleep(2)
+# 페이지 변경 src
+# 하이퍼링크 -> onClick 일경우
+src <- "if($('#inpSchBrnchNm').val() == '주소 또는 지점명'){
+		$('#inpSchBrnchNm').val('');
+	}
+	
+	$('#inpPageIndex').val(arguments[0]);
+	$('#frmDefault').attr({'action': '/bc/branchSearch/branchSearch.do', 'target': 'ifrmContentsNm', 'method': 'get'}).submit();
+	
+	if($('#inpSchBrnchNm').val() == ''){
+		$('#inpSchBrnchNm').val('주소 또는 지점명');
+	}
+"
+slist <- NULL
+for(i in 1:3){ # 페이지수
+  #페이지 클릭
+  #main switch
+  remDr$switchToFrame(NULL)
+  #i = arguments[0] = page
+  remDr$executeScript(src,list(toString(i)))
+  #RSelenuim manpage 사용법
+  #webElem <- remDr$findElement(using = "name", value = "contents")
+  #remDr$switchToFrame(webElem$elementId)
+  #webElem$elementId 값이 갱신.
+  #0으로 하드코딩해서 쓰기로 함.
+  #iframe 으로 Switch
+  remDr$switchToFrame(0)
+  #지점명
+  slist2 <- remDr$findElements(using='css', '#contents > ul > li> div > div.article1 > h3')
+  slist2 <- sapply(slist2,function(x){x$getElementText()})
+  slist2 <- unlist(slist2)
+  #지점주소
+  slist3 <- remDr$findElements(using='css', '#contents > ul > li > div > div.article2 > ul:nth-child(4) > li:nth-child(1)')
+  slist3 <- sapply(slist3,function(x){x$getElementText()})
+  slist3 <- gsub("신\n","",slist3)
+  slist <- rbind(slist, data.frame(slist2, slist3))
+  Sys.sleep(3)
+}
+write.csv(slist, "lottmart.csv")
+```
+
