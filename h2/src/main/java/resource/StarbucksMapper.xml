@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="resource.StarbucksMapper">
+
+    <select id="selectStarbucksinfo" resultType="vo.StarbucksVO">
+		select storeId, storeName, storeAddr, storeLat, storeLng from starbucks
+	</select>
+	
+	<insert id="insertStarbucks" parameterType="vo.StarbucksVO">
+		insert into starbucks(storeName, storeAddr, storeLat, storeLng) values 
+		(#{storename},#{storeaddr},#{storelat},#{storelng})
+	</insert>
+
+</mapper>
